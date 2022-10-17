@@ -19,7 +19,7 @@ public class Question {
     }
 
     public int[] askQuestionGetAnswer() {
-        String prompt = this + "\n Please select your answer: 'a', 'b', 'c', or 'd'... ";
+        String prompt = this + "Please select your answer: 'a', 'b', 'c', or 'd'... ";
         System.out.print(prompt);
         while(true) {
             Scanner scanner = new Scanner(System.in);
@@ -37,6 +37,13 @@ public class Question {
                 }
                 return choiceTally[answerGiven];
             }
+        }
+    }
+
+    //This function stores the result to the question once the participant reveals what party they are in
+    public void storeResult(int chosenParty) {
+        if (answerGiven != -1) {
+            choiceTally[answerGiven][chosenParty]++;
         }
     }
 
