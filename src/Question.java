@@ -6,7 +6,7 @@ public class Question {
     private String choice2;
     private String choice3;
     private String choice4;
-    private int[][] choiceTally = {{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0}};
+    private int[][] choiceTally = {{4,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0}};
     private int answerGiven = -1;
 
 

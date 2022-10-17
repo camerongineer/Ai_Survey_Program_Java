@@ -2,7 +2,6 @@ import java.util.Scanner;
 
 public class Participant {
     private int confirmedParty = -1;
-
     public int questionsAnswered = 0;
     private int democraticPoints = 0;
     private int republicanPoints = 0;
@@ -24,7 +23,7 @@ public class Participant {
     public void resetGreenPoints() { greenPoints = 0; }
     public void resetLibertarianPoints() { libertarianPoints = 0; }
 
-    public boolean hasConfirmedParty() { return confirmedParty != -1; }
+    public void confirmParty(int party) { confirmedParty = party; }
 
     public boolean isLikelyDemocrat() {
         return democraticPoints > (republicanPoints + greenPoints + libertarianPoints);
