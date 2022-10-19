@@ -1,16 +1,23 @@
 import java.util.Scanner;
 
 public class Question {
+    public int questionID;
     private String question;
     private String choice1;
     private String choice2;
     private String choice3;
     private String choice4;
-    private int[][] choiceTally = {{4,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0}};
+    private int[][] choiceTally = {{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0}};
+
+    public void setChoiceTally(int[][] choiceTally) {
+        this.choiceTally = choiceTally;
+    }
+
     private int answerGiven = -1;
 
 
-    public Question(String question, String choice1, String choice2, String choice3, String choice4) {
+    public Question(int questionID, String question, String choice1, String choice2, String choice3, String choice4) {
+        this.questionID = questionID;
         this.question = question;
         this.choice1 = choice1;
         this.choice2 = choice2;
@@ -59,5 +66,16 @@ public class Question {
                           D. %s
                         """
                 , question, choice1, choice2, choice3, choice4);
+    }
+
+    public String choiceTallyPrintout() {
+        StringBuilder tally = new StringBuilder();
+        for (int i = 0; i < choiceTally.length; i++) {
+            for (int j = 0; j < choiceTally[i].length; j++) {
+                tally.append(choiceTally[i][j]).append(",");
+            }
+        }
+        tally.replace(tally.length() - 1, tally.length(), "");
+        return tally.toString();
     }
 }

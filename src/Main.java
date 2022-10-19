@@ -1,3 +1,4 @@
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -12,17 +13,7 @@ public class Main {
         boolean partyIsKnown = false;
         int knownParty = -1;
         int numberOfGuesses = 0;
-        ArrayList<Question> questionnaire = new ArrayList<>();
-        questionnaire.add(new Question("Hi?", "Yes", "No", "Maybe", "So"));
-        questionnaire.add(new Question("Hi?", "Yes", "No", "Maybe", "So"));
-        questionnaire.add(new Question("Hi?", "Yes", "No", "Maybe", "So"));
-        questionnaire.add(new Question("Hi?", "Yes", "No", "Maybe", "So"));
-        questionnaire.add(new Question("Hi?", "Yes", "No", "Maybe", "So"));
-        questionnaire.add(new Question("Hi?", "Yes", "No", "Maybe", "So"));
-        questionnaire.add(new Question("Hi?", "Yes", "No", "Maybe", "So"));
-        questionnaire.add(new Question("Hi?", "Yes", "No", "Maybe", "So"));
-        questionnaire.add(new Question("Hi?", "Yes", "No", "Maybe", "So"));
-        questionnaire.add(new Question("Hi?", "Yes", "No", "Maybe", "So"));
+        ArrayList<Question> questionnaire = loadQuestionnaire();
         for (int i = 0; i < questionnaire.size(); i++) {
             Question question = questionnaire.get(i);
             if (partyIsKnown) break;
@@ -32,7 +23,7 @@ public class Main {
             if (participant.couldBeGreen) participant.incrementGreenPoints(answer[2]);
             if (participant.couldBeLibertarian) participant.incrementLibertarianPoints(answer[3]);
             participant.questionsAnswered++;
-            if (participant.questionsAnswered >= 5) {
+            if (participant.questionsAnswered >= 3) {
                 if (participant.isLikelyDemocrat() && participant.couldBeDemocrat) {
                     partyIsKnown = participant.confirmOrDenyParty(0);
                     numberOfGuesses++;
@@ -79,7 +70,7 @@ public class Main {
         if (knownParty != -1) {
             String participantParty = knownParty == 0 ? "Democratic" : knownParty == 1 ? "Republican" : knownParty == 2 ? "Green" : "Libertarian";
             String plural = numberOfGuesses == 1 ? "try" : "tries";
-            System.out.printf("We have correctly guessed that you are in the %s in %d party in %s!\n", participantParty, numberOfGuesses, plural);
+            System.out.printf("We have correctly guessed that you are in the %s party in %d %s!\n", participantParty, numberOfGuesses, plural);
         } else {
             knownParty = getParty();
             participant.confirmParty(knownParty);
@@ -88,12 +79,14 @@ public class Main {
             question.storeResult(knownParty);
         }
         System.out.println("Your results have been logged. Thank you for your participation.");
+        saveTally(questionnaire);
     }
 
     private static int getParty() {
         Scanner scanner = new Scanner(System.in);
         System.out.println(
                 """
+                        
                         What is your political party?\s
                           A: Democratic Party
                           B: Republican Party
@@ -108,6 +101,72 @@ public class Main {
         return input.matches("a") ? 0 : input.matches("b") ? 1 : input.matches("c") ? 2 : 3;
     }
 
+    private static ArrayList<Question> loadQuestionnaire() {
+        ArrayList<Question> questionnaire = new ArrayList<>() {
+            @Override
+            public boolean contains(Object o) {
+                return super.contains(o);
+            }
+        };
+        File questions = new File("questions.txt");
+        try {
+            FileReader fr = new FileReader(questions);
+            BufferedReader br = new BufferedReader(fr);
+            String line = br.readLine();
+            while (line != null) {
+                Question question = new Question(Integer.parseInt(line.split(" :: ")[0]),
+                        line.split(" :: ")[1],
+                        line.split(" :: ")[2],
+                        line.split(" :: ")[3],
+                        line.split(" :: ")[4],
+                        line.split(" :: ")[5]);
+                questionnaire.add(question);
+                line = br.readLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Unable to load Questionnaire");
+            throw new RuntimeException(e);
+        }
+        File tally = new File("tally.txt");
+        try {
+            FileReader fr = new FileReader(tally);
+            BufferedReader br = new BufferedReader(fr);
+            String line = br.readLine();
+            while (line != null) {
+                int questionID = Integer.parseInt(line.split(" :: ")[0]);
+                String tallyStr = line.split(" :: ")[1];
+                String[] tallySplit = tallyStr.split(",");
+                int count = 0;
+                int[][] choiceTally = {{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0}};
+                for (int i = 0; i < choiceTally.length; i++) {
+                    for (int j = 0; j < choiceTally[i].length; j++) {
+                        choiceTally[i][j] = Integer.parseInt(tallySplit[count++]);
+                    }
+                }
+                for (Question question : questionnaire) {
+                    if (question.questionID == questionID) {
+                        question.setChoiceTally(choiceTally);
+                    }
+                }
+                line = br.readLine();
+            }
+        } catch (IOException io) {
+            System.out.println("Unable to distribute tally");
+            throw new RuntimeException(io);
+        }
+        return questionnaire;
+    }
 
+    private static void saveTally(ArrayList<Question> questionnaire) {
+        File tally = new File("tally.txt");
+        try(FileWriter fw = new FileWriter(tally)) {
+            for (Question question : questionnaire) {
+                fw.write(String.format("%d :: %s\n", question.questionID, question.choiceTallyPrintout()));
+            }
+        } catch (IOException e) {
+            System.out.println("Unable to save the tally");
+            throw new RuntimeException(e);
+        }
+    }
 
 }
